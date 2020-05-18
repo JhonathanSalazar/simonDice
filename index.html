@@ -102,15 +102,74 @@
       class Game {
         constructor() {
           this.initialize()
+          this.secuenceGeneration()
+          this.nextLevel()
         }
 
         initialize() {
+          this.selectColor = this.selectColor.bind(this)
           btnBegin.classList.add('hide')
+          this.level = 1
+          this.colors = {
+            celeste,
+            violeta,
+            naranja,
+            verde
+          }
+        }
+
+        secuenceGeneration() {
+          this.secuence = new Array(10).fill(0).map(n => Math.floor(Math.random() * 4))
+        }
+
+        nextLevel() {
+          this.higthlySecuence()
+          this.addClickEvent()
+        }
+
+        tranformNumberColor(number) {
+          switch(number) {
+            case 0:
+              return 'celeste'
+            case 1:
+              return 'violeta'
+            case 2:
+              return 'naranja'
+            case 3:
+              return 'verde'
+          }
+        }
+
+        higthlySecuence() {
+          for(let i = 0; i < this.level; i++){
+            const color = this.tranformNumberColor(this.secuence[i])
+            setTimeout(() => this.higthlyColor(color), 1000 * i)
+          }
+        }
+
+        higthlyColor(color) {
+          this.colors[color].classList.add('light')
+          setTimeout(() => this.shutdownColor(color), 350)
+        }
+
+        shutdownColor(color) {
+          this.colors[color].classList.remove('light')
+        }
+
+        addClickEvent() {
+          this.colors.celeste.addEventListener('click', this.selectColor)
+          this.colors.violeta.addEventListener('click', this.selectColor)
+          this.colors.naranja.addEventListener('click', this.selectColor)
+          this.colors.verde.addEventListener('click', this.selectColor)
+        }
+
+        selectColor(ev) {
+          console.log(this)
         }
       }
 
       function beginGame() {
-        var game = new Game()
+        window.game = new Game()
       }
     </script>
   </body>
