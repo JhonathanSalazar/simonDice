@@ -82,6 +82,10 @@
       .hide {
         display: none;
       }
+
+      *{
+        font-family: 'Arial';
+      }
     </style>
   </head>
   <body>
@@ -92,23 +96,26 @@
       <div id="verde" class="color verde right" data-color="verde"></div>
       <button id="btnEmpezar" class="btn-start" onclick="beginGame()">Empezar a jugar!</button>
     </div>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script>
       const celeste = document.getElementById('celeste')
       const violeta = document.getElementById('violeta')
       const naranja = document.getElementById('naranja')
       const verde = document.getElementById('verde')
       const btnBegin = document.getElementById('btnEmpezar')
+      const lastlevel = 2
 
       class Game {
         constructor() {
           this.initialize()
           this.secuenceGeneration()
-          this.nextLevel()
+          setTimeout(this.nextLevel(), 1000)
         }
 
         initialize() {
+          this.nextLevel = this.nextLevel.bind(this)
           this.selectColor = this.selectColor.bind(this)
-          btnBegin.classList.add('hide')
+          this.toggleBtnBegin()
           this.level = 1
           this.colors = {
             celeste,
@@ -118,11 +125,20 @@
           }
         }
 
+        toggleBtnBegin() {
+          if(btnBegin.classList.contains('hide')) {
+            btnBegin.classList.remove('hide')
+          } else {
+            btnBegin.classList.add('hide')
+          }
+        }
+
         secuenceGeneration() {
-          this.secuence = new Array(10).fill(0).map(n => Math.floor(Math.random() * 4))
+          this.secuence = new Array(lastlevel).fill(0).map(n => Math.floor(Math.random() * 4))
         }
 
         nextLevel() {
+          this.sublevel = 0
           this.higthlySecuence()
           this.addClickEvent()
         }
@@ -137,6 +153,19 @@
               return 'naranja'
             case 3:
               return 'verde'
+          }
+        }
+
+        tranformColorNumber(color) {
+          switch(color) {
+            case 'celeste':
+              return 0
+            case 'violeta':
+              return 1
+            case 'naranja':
+              return 2
+            case 'verde':
+              return 3
           }
         }
 
@@ -163,8 +192,45 @@
           this.colors.verde.addEventListener('click', this.selectColor)
         }
 
+        deleteClickEvents() {
+          this.colors.celeste.removeEventListener('click', this.selectColor)
+          this.colors.violeta.removeEventListener('click', this.selectColor)
+          this.colors.naranja.removeEventListener('click', this.selectColor)
+          this.colors.verde.removeEventListener('click', this.selectColor)
+        }
+
         selectColor(ev) {
-          console.log(this)
+          const nameColor = ev.target.dataset.color
+          const numberColor = this.tranformColorNumber(nameColor)
+          this.higthlyColor(nameColor)
+
+          if (numberColor === this.secuence[this.sublevel]) {
+            this.sublevel ++
+            if (this.sublevel === this.level) {
+              this.level ++
+              this.deleteClickEvents()
+              if (this.level === (lastlevel + 1)) {
+                this.winGame()
+              } else {
+                setTimeout(this.nextLevel, 1500)
+              }
+            }
+          } else {
+            this.loseGame()
+          }
+        }
+
+        winGame() {
+          swal('Platzi','Felicitaciones Ganaste SimonDice :D', 'success')
+            .then(this.initialize())
+        }
+
+        loseGame() {
+          swal('Platzi','Lo lamentamos perdiste SimonDice :(', 'error')
+            .then(() => {
+              this.deleteClickEvents()
+              this.initialize()
+            })
         }
       }
 
